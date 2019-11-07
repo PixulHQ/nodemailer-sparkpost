@@ -1,36 +1,42 @@
 {
-  "name": "nodemailer-sparkpost-transport",
-  "version": "2.2.0",
+  "name": "@pixul/nodemailer-sparkpost",
+  "version": "3.0.0",
   "description": "SparkPost transport for Nodemailer",
-  "main": "lib/sparkPostTransport.js",
+  "main": "lib/index.js",
   "scripts": {
-    "pretest": "eslint examples lib test *.js",
-    "test": "mocha",
-    "postversion": "git push upstream && git push --tags upstream"
+    "coveralls": "lab -r lcov | coveralls",
+    "test-cov-html": "lab -r html -o coverage.html",
+    "test": "lab"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:SparkPost/nodemailer-sparkpost-transport.git"
+    "url": "git@github.com:PixulHQ/nodemailer-sparkpost"
   },
   "keywords": [
     "nodemailer",
     "sparkpost"
   ],
-  "author": "SparkPost",
+  "author": "Daniel COLE <daniel@pixul.fr>",
+  "contributors": [
+    "SparkPost"
+  ],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/SparkPost/nodemailer-sparkpost-transport/issues"
+    "url": "https://github.com/PixulHQ/nodemailer-sparkpost/issues"
   },
-  "homepage": "https://github.com/SparkPost/nodemailer-sparkpost-transport",
+  "homepage": "https://github.com/PixulHQ/nodemailer-sparkpost",
   "dependencies": {
-    "sparkpost": "^2.1.0"
+    "@pixul/sparkpost": "3.0.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "eslint": "=3.0.0",
-    "eslint-config-sparkpost": "1.0.1",
-    "mocha": "^5.2.0",
-    "nodemailer": "^4.6.8",
-    "sinon": "^7.1.1"
+    "@hapi/lab": "21.0.0",
+    "@hapi/code": "7.0.0",
+    "@hapi/eslint-config-hapi": "12.3.0",
+    "@hapi/eslint-plugin-hapi": "4.3.4",
+    "eslint": "6.6.0",
+    "eslint-config-pixul": "2.0.0",
+    "eslint-plugin-security": "1.4.0",
+    "nodemailer": "6.3.1",
+    "sinon": "7.5.0"
   }
 }

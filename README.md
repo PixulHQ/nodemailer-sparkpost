@@ -1,27 +1,25 @@
-<a href="https://www.sparkpost.com"><img src="https://www.sparkpost.com/sites/default/files/attachments/SparkPost_Logo_2-Color_Gray-Orange_RGB.svg" width="200px"/></a>
-
-[Sign up](https://app.sparkpost.com/join?plan=free-0817?src=Social%20Media&sfdcid=70160000000pqBb&pc=GitHubSignUp&utm_source=github&utm_medium=social-media&utm_campaign=github&utm_content=sign-up) for a SparkPost account and visit our [Developer Hub](https://developers.sparkpost.com) for more resources.
-
 # SparkPost transport for Nodemailer
-## nodemailer-sparkpost-transport
 
-[![Build Status](https://travis-ci.org/SparkPost/nodemailer-sparkpost-transport.svg?branch=master)](https://travis-ci.org/SparkPost/nodemailer-sparkpost-transport)
-[![NPM version](https://badge.fury.io/js/nodemailer-sparkpost-transport.png)](http://badge.fury.io/js/nodemailer-sparkpost-transport)
+This is a fork of [nodemailer-sparkpost-transport](https://github.com/SparkPost/nodemailer-sparkpost-transport).
+
+[![Travis CI](https://travis-ci.org/PixulHQ/nodemailer-sparkpost.svg?branch=master)](https://travis-ci.org/PixulHQ/nodemailer-sparkpost) [![Coverage Status](https://coveralls.io/repos/github/PixulHQ/c/badge.svg?branch=master)](https://coveralls.io/github/PixulHQ/nodemailer-sparkpost?branch=master) [![npm version](https://badge.fury.io/js/%40pixul%2Fsparkpost.svg)](https://badge.fury.io/js/%40pixul%2Fsparkpost) [![npm version](https://badge.fury.io/js/%40pixul%2Fnodemailer-sparkpost.svg)](https://badge.fury.io/js/%40pixul%2Fnodemailer-sparkpost)
+
+Lead Maintainer: [Daniel Cole](https://github.com/optii)
 
 ## Usage
 
 ### Install
 
 ```
-npm install nodemailer-sparkpost-transport
+npm install @pixul/nodemailer-sparkpost
 ```
 
 ### Create a Nodemailer transport object
 
 ```javascript
-var nodemailer = require('nodemailer');
-var sparkPostTransport = require('nodemailer-sparkpost-transport');
-var transporter = nodemailer.createTransport(sparkPostTransport(options));
+const Nodemailer = require('nodemailer');
+const SparkPostTransport = require('@pixul/nodemailer-sparkpos');
+const Transporter = Nodemailer.createTransport(SparkPostTransport(options));
 ```
 
 where:
@@ -46,6 +44,7 @@ transport.sendMail({
   text: 'Plain text',
   html: 'Rich taggery'
 }, function(err, info) {
+
   if (err) {
     console.log('Error: ' + err);
   } else {
