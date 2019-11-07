@@ -2,7 +2,7 @@
 
 This is a fork of [nodemailer-sparkpost-transport](https://github.com/SparkPost/nodemailer-sparkpost-transport).
 
-[![Travis CI](https://travis-ci.org/PixulHQ/nodemailer-sparkpost.svg?branch=master)](https://travis-ci.org/PixulHQ/nodemailer-sparkpost) [![Coverage Status](https://coveralls.io/repos/github/PixulHQ/c/badge.svg?branch=master)](https://coveralls.io/github/PixulHQ/nodemailer-sparkpost?branch=master) [![npm version](https://badge.fury.io/js/%40pixul%2Fsparkpost.svg)](https://badge.fury.io/js/%40pixul%2Fsparkpost) [![npm version](https://badge.fury.io/js/%40pixul%2Fnodemailer-sparkpost.svg)](https://badge.fury.io/js/%40pixul%2Fnodemailer-sparkpost)
+[![Travis CI](https://travis-ci.org/PixulHQ/nodemailer-sparkpost.svg?branch=master)](https://travis-ci.org/PixulHQ/nodemailer-sparkpost) [![Coverage Status](https://coveralls.io/repos/github/PixulHQ/c/badge.svg?branch=master)](https://coveralls.io/github/PixulHQ/nodemailer-sparkpost?branch=master) [![npm version](https://badge.fury.io/js/%40pixul%2Fnodemailer-sparkpost.svg)](https://badge.fury.io/js/%40pixul%2Fnodemailer-sparkpost)
 
 Lead Maintainer: [Daniel Cole](https://github.com/optii)
 
