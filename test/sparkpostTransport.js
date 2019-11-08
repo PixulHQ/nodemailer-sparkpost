@@ -76,7 +76,7 @@ describe('Send Method', () => {
 
     describe('SP-centric mail structure', () => {
 
-        it('should be able to overload options at the transmission', () => {
+        it('should be able to overload options at the transmission', async () => {
 
             // Create the default transport
             const transport = SparkPostTransport({
@@ -109,7 +109,7 @@ describe('Send Method', () => {
             };
 
             // Stub the send method of the SDK out
-            Sinon.stub(transport, 'send').callsFake((data, resolve) => {
+            Sinon.stub(transport, 'send').callsFake((data) => {
                 // Grab the transmission body from the send() payload for assertions
                 expect(data.campaign_id).to.equal('another_sample_campaign');
                 expect(data.tags).to.equal(['alternative-tag']);
@@ -120,28 +120,22 @@ describe('Send Method', () => {
                 expect(data.recipients).to.equal([{ 'list_id' : 'myStoredRecipientTestList' }]);
 
                 // Resolve the stub's spy
-                resolve({
+                return {
                     results : {
                         total_rejected_recipients : 0,
                         total_accepted_recipients : 1,
                         id                        : '66123596945797072'
                     }
-                });
+                };
             });
 
-            // Call the stub from above
-            return new Promise((resolve) => {
+            const data = await transport.send(overloadedTransmission);
 
-                transport.send(overloadedTransmission, (data) => {
+            expect(data.results.id).to.exist();
+            expect(data.results.total_rejected_recipients).to.exist();
+            expect(data.results.total_accepted_recipients).to.exist();
 
-                    expect(data.results.id).to.exist();
-                    expect(data.results.total_rejected_recipients).to.exist();
-                    expect(data.results.total_accepted_recipients).to.exist();
-                    resolve();
-                });
-                // Return the original method to its proper state
-                transport.send.restore();
-            });
+            transport.send.restore();
         });
     });
 
@@ -153,19 +147,18 @@ describe('Send Method', () => {
         let rcp1;
         let rcp2;
 
-        const checkRecipientsFromFld = (email, infld, val, outfld, resolve) => {
+        const checkRecipientsFromFld = async (email, infld, val, outfld) => {
 
             email[infld] = val;
-            transport.sendMail(email, () => {
 
-                const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
+            await transport.sendMail(email);
 
-                expect(transBody).to.include(['recipients', 'content']);
-                expect(transBody[outfld].length).to.equal(2);
-                expect(transBody[outfld][0]).to.equal({ address : rcp1 });
-                expect(transBody[outfld][1]).to.equal({ address : rcp2 });
-                resolve();
-            });
+            const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
+
+            expect(transBody).to.include(['recipients', 'content']);
+            expect(transBody[outfld].length).to.equal(2);
+            expect(transBody[outfld][0]).to.equal({ address : rcp1 });
+            expect(transBody[outfld][1]).to.equal({ address : rcp2 });
         };
 
         beforeEach(() => {
@@ -191,7 +184,7 @@ describe('Send Method', () => {
                 }
             };
 
-            sptrans.sparkPostEmailClient.transmissions.send = Sinon.stub().yields({
+            sptrans.sparkPostEmailClient.transmissions.send = Sinon.stub().resolves({
                 results : {
                     total_rejected_recipients : 0,
                     total_accepted_recipients : 1,
@@ -200,31 +193,25 @@ describe('Send Method', () => {
             });
         });
 
-        it('should accept nodemailer content fields', () => {
+        it('should accept nodemailer content fields', async () => {
 
-            return new Promise((resolve) => {
+            await transport.sendMail(mail);
+            const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
 
-                transport.sendMail(mail, () => {
-
-                    const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
-
-                    expect(transBody).to.include(['recipients', 'content']);
-                    expect(transBody.content.html).to.equal(mail.html);
-                    expect(transBody.content.text).to.equal(mail.text);
-                    expect(transBody.content.subject).to.equal(mail.subject);
-                    expect(transBody.content.from).to.equal(mail.from);
-                    expect(transBody.content.reply_to).to.equal(mail.replyTo);
-                    expect(transBody.content.headers).to.equal(mail.headers);
-                    expect(transBody.recipients.length).to.equal(1);
-                    expect(transBody.recipients[0]).to.include('address');
-                    expect(transBody.recipients[0].address).to.be.a.string();
-                    expect(transBody.recipients[0].address).to.equal(mail.to);
-                    resolve();
-                });
-            });
+            expect(transBody).to.include(['recipients', 'content']);
+            expect(transBody.content.html).to.equal(mail.html);
+            expect(transBody.content.text).to.equal(mail.text);
+            expect(transBody.content.subject).to.equal(mail.subject);
+            expect(transBody.content.from).to.equal(mail.from);
+            expect(transBody.content.reply_to).to.equal(mail.replyTo);
+            expect(transBody.content.headers).to.equal(mail.headers);
+            expect(transBody.recipients.length).to.equal(1);
+            expect(transBody.recipients[0]).to.include('address');
+            expect(transBody.recipients[0].address).to.be.a.string();
+            expect(transBody.recipients[0].address).to.equal(mail.to);
         });
 
-        it('should format attachments', () => {
+        it('should format attachments', async () => {
 
             mail.attachments = [
                 {
@@ -239,129 +226,92 @@ describe('Send Method', () => {
                 }
             ];
 
-            return new Promise((resolve) => {
+            await transport.sendMail(mail);
 
-                transport.sendMail(mail, () => {
+            const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
 
-                    const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
-
-                    expect(transBody.content.attachments.length).to.equal(2);
-                    expect(transBody.content.attachments[0]).to.equal({
-                        name : 'an_attachment',
-                        type : 'application/pdf',
-                        data : 'Q29uZ3JhdHVsYXRpb25zLCB5b3UgY2FuIGJhc2U2NCBkZWNvZGUh'
-                    });
-                    resolve();
-                });
+            expect(transBody.content.attachments.length).to.equal(2);
+            expect(transBody.content.attachments[0]).to.equal({
+                name : 'an_attachment',
+                type : 'application/pdf',
+                data : 'Q29uZ3JhdHVsYXRpb25zLCB5b3UgY2FuIGJhc2U2NCBkZWNvZGUh'
             });
         });
 
-        it('should accept raw mail structure', () => {
+        it('should accept raw mail structure', async () => {
 
             delete mail.subject;
             delete mail.text;
             delete mail.html;
             delete mail.from;
             mail.raw = 'rawmsg';
-            return new Promise((resolve) => {
 
-                transport.sendMail(mail, () => {
+            await transport.sendMail(mail);
 
-                    const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
+            const transBody = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
 
-                    expect(transBody).to.include(['recipients', 'content']);
-                    expect(transBody.content).to.include('email_rfc822');
-                    expect(transBody.recipients.length).to.equal(1);
-                    expect(transBody.recipients[0]).to.include('address');
-                    expect(transBody.recipients[0].address).to.be.a.string();
-                    expect(transBody.recipients[0].address).to.equal(mail.to);
-                    resolve();
-                });
-            });
+            expect(transBody).to.include(['recipients', 'content']);
+            expect(transBody.content).to.include('email_rfc822');
+            expect(transBody.recipients.length).to.equal(1);
+            expect(transBody.recipients[0]).to.include('address');
+            expect(transBody.recipients[0].address).to.be.a.string();
+            expect(transBody.recipients[0].address).to.equal(mail.to);
         });
 
-        it('should accept from as a string', () => {
+        it('should accept from as a string', async () => {
 
             mail.from = 'me@here.com';
-            return new Promise((resolve) => {
+            await transport.sendMail(mail);
 
-                transport.sendMail(mail, () => {
-
-                    const trans = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
-                    expect(trans.content.from).to.be.a.string();
-                    resolve();
-                });
-            });
+            const trans = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
+            expect(trans.content.from).to.be.a.string();
         });
 
-        it('should accept from as an object', () => {
+        it('should accept from as an object', async () => {
 
             mail.from = {
                 name    : 'Me',
                 address : 'me@here.com'
             };
 
-            return new Promise((resolve) => {
+            await transport.sendMail(mail);
 
-                transport.sendMail(mail, () => {
-
-                    const trans = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
-                    expect(trans.content.from).to.be.an.object();
-                    expect(trans.content.from).to.include('name');
-                    expect(trans.content.from.name).to.equal(mail.from.name);
-                    expect(trans.content.from).to.include('email');
-                    expect(trans.content.from.email).to.equal(mail.from.address);
-                    resolve();
-                });
-            });
+            const trans = sptrans.sparkPostEmailClient.transmissions.send.firstCall.args[0];
+            expect(trans.content.from).to.be.an.object();
+            expect(trans.content.from).to.include('name');
+            expect(trans.content.from.name).to.equal(mail.from.name);
+            expect(trans.content.from).to.include('email');
+            expect(trans.content.from.email).to.equal(mail.from.address);
         });
 
-        it('should accept to as an array', (done) => {
+        it('should accept to as an array', () => {
 
-            return new Promise((resolve) => {
-
-                checkRecipientsFromFld(mail, 'to', [rcp1, rcp2], 'recipients', resolve);
-            });
+            return checkRecipientsFromFld(mail, 'to', [rcp1, rcp2], 'recipients');
         });
 
-        it('should accept to as a string', (done) => {
+        it('should accept to as a string', () => {
 
-            return new Promise((resolve) => {
-
-                checkRecipientsFromFld(mail, 'to', [rcp1, rcp2].join(','), 'recipients', resolve);
-            });
+            return checkRecipientsFromFld(mail, 'to', [rcp1, rcp2].join(','), 'recipients');
         });
 
         it('should accept cc as an array', () => {
 
-            return new Promise((resolve) => {
-
-                checkRecipientsFromFld(mail, 'cc', [rcp1, rcp2], 'cc', resolve);
-            });
+            return checkRecipientsFromFld(mail, 'cc', [rcp1, rcp2], 'cc');
         });
 
         it('should accept cc as a string', () => {
 
-            return new Promise((resolve) => {
-
-                checkRecipientsFromFld(mail, 'cc', [rcp1, rcp2].join(','), 'cc', resolve);
-            });
+            return checkRecipientsFromFld(mail, 'cc', [rcp1, rcp2].join(','), 'cc');
         });
 
         it('should accept bcc as an array', () => {
 
-            return new Promise((resolve) => {
-
-                checkRecipientsFromFld(mail, 'bcc', [rcp1, rcp2], 'bcc', resolve);
-            });
+            return checkRecipientsFromFld(mail, 'bcc', [rcp1, rcp2], 'bcc');
         });
 
         it('should accept bcc as a string', () => {
 
-            return new Promise((resolve) => {
-
-                checkRecipientsFromFld(mail, 'bcc', [rcp1, rcp2].join(','), 'bcc', resolve);
-            });
+            return checkRecipientsFromFld(mail, 'bcc', [rcp1, rcp2].join(','), 'bcc');
         });
     });
 });

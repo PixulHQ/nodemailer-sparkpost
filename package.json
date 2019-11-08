@@ -1,6 +1,6 @@
 {
   "name": "@pixul/nodemailer-sparkpost",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "SparkPost transport for Nodemailer",
   "main": "lib/index.js",
   "scripts": {
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/PixulHQ/nodemailer-sparkpost",
   "dependencies": {
-    "@pixul/sparkpost": "3.0.0"
+    "@pixul/sparkpost": "3.0.1"
   },
   "devDependencies": {
     "@hapi/lab": "21.0.0",
